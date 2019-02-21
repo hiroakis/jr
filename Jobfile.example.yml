@@ -1,0 +1,17 @@
+jobs:
+  - name: The job name
+    tasks:
+      - name: task 1
+        workdir: .
+        command: echo
+        args:
+          - run task1
+        timeout: 10s
+      - name: task 2
+        workdir: .
+        command: echo
+        args:
+          - The TASK_ENV value is $TASK_ENV
+        timeout: 10s
+        env:
+          TASK_ENV: task2_env
