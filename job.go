@@ -44,8 +44,6 @@ var (
 
 // Run runs a job
 func (job Job) Run() error {
-	st := time.Now()
-
 	if job.Stdout == nil {
 		job.Stdout = defaultStdoutLogger
 	}
@@ -55,28 +53,26 @@ func (job Job) Run() error {
 
 	job.Stderr.Printf("START: %s", job.Name)
 	for _, task := range job.Tasks {
-		job.Stderr.Printf("The task is INPROGRESS: %s", task.Name)
+		job.Stderr.Printf("INPROGRESS: %s", task.Name)
 		if err := task.Run(); err != nil {
 			job.Stderr.Printf("FAILED: %s, error: %v", task.Name, err)
 			return errors.Wrap(err, "task.run failed")
 		}
 
-		job.Stderr.Printf("The task is DONE: %s, %s", task.Name, task.Stderr)
+		job.Stdout.Printf("DONE: %s, stdout: %s", task.Name, task.Stdout)
+		job.Stderr.Printf("DONE: %s, stderr: %s", task.Name, task.Stderr)
 	}
 	job.Stderr.Printf("FINISH: %s", job.Name)
-
-	job.Stdout.Printf("%s total time: %v", job.Name, time.Now().Sub(st))
 	return nil
 }
 
 // Task task
 type Task struct {
-	Name    string            `yaml:"name"`
-	WorkDir string            `yaml:"workdir"`
-	Command string            `yaml:"command"`
-	Args    []string          `yaml:"args"`
-	Env     map[string]string `yaml:"env"`
-	Timeout time.Duration     `yaml:"timeout"`
+	Name    string        `yaml:"name"`
+	WorkDir string        `yaml:"workdir"`
+	Command string        `yaml:"command"`
+	Args    []string      `yaml:"args"`
+	Timeout time.Duration `yaml:"timeout"`
 	Stdout  *bytes.Buffer
 	Stderr  *bytes.Buffer
 }
@@ -84,15 +80,6 @@ type Task struct {
 const defaultTaskTimeout = 30 * time.Second
 
 func (t *Task) Run() error {
-	for k, v := range t.Env {
-		os.Setenv(k, v)
-	}
-	defer func() {
-		for k := range t.Env {
-			os.Unsetenv(k)
-		}
-	}()
-
 	if t.Timeout == 0 {
 		t.Timeout = defaultTaskTimeout
 	}

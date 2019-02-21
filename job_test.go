@@ -25,10 +25,6 @@ jobs:
           - -opt2
           - -opt3=opt3
         timeout: 30s
-        env:
-          no_proxy: 169.254.169.254
-          http_proxy: http://proxy.com:8080
-          https_proxy: http://proxy.com:8080
 `
 
 	jobs, err := LoadJob(strings.NewReader(jobFile))
@@ -46,17 +42,12 @@ jobs:
 	assert.Equal(t, "batch.bat", task0.Command)
 	assert.Nil(t, task0.Args)
 	assert.Equal(t, 30*time.Second, task0.Timeout)
-	assert.Equal(t, 0, len(task0.Env))
 
 	assert.Equal(t, "Run some-command", task1.Name)
 	assert.Equal(t, ".", task1.WorkDir)
 	assert.Equal(t, "some-command.exe", task1.Command)
 	assert.Equal(t, []string{"-opt1 opt1", "-opt2", "-opt3=opt3"}, task1.Args)
 	assert.Equal(t, 30*time.Second, task1.Timeout)
-	assert.Equal(t, 3, len(task1.Env))
-	assert.Equal(t, "169.254.169.254", task1.Env["no_proxy"])
-	assert.Equal(t, "http://proxy.com:8080", task1.Env["http_proxy"])
-	assert.Equal(t, "http://proxy.com:8080", task1.Env["https_proxy"])
 }
 
 func TestTaskRun(t *testing.T) {
@@ -72,21 +63,6 @@ func TestTaskRun(t *testing.T) {
 				Command: "echo",
 				Args:    []string{"-n", "xxxx"},
 				Timeout: 1 * time.Second,
-			},
-		},
-		{
-			name: "run echo command",
-			task: Task{
-				Name:    "echo command",
-				WorkDir: ".",
-				Command: "echo",
-				Args:    []string{"-n", "xxxx"},
-				Timeout: 1 * time.Second,
-				Env: map[string]string{
-					"no_proxy":    "169.254.169.254",
-					"http_proxy":  "http://proxy.prd.proc.kanmu:8080",
-					"https_proxy": "http://proxy.prd.proc.kanmu:8080",
-				},
 			},
 		},
 		{
