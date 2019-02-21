@@ -1,4 +1,4 @@
-package hiking
+package jr
 
 import (
 	"strings"
