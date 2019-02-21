@@ -1,6 +1,6 @@
 # jr
 
-A task runner
+A job runner
 
 # License
 
